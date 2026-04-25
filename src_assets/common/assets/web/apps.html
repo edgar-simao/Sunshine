@@ -499,6 +499,7 @@
   import { initApp } from './init'
   import Navbar from './Navbar.vue'
   import Checkbox from './Checkbox.vue'
+  import { apiFetch } from './fetch_utils'
   import { Modal } from 'bootstrap/dist/js/bootstrap'
   import {
     ArrowRight,
@@ -630,7 +631,7 @@
           "Are you sure to delete " + this.apps[id].name + "?"
         );
         if (resp) {
-          fetch("./api/apps/" + id, {
+          apiFetch("./api/apps/" + id, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json"
@@ -727,7 +728,7 @@
       },
       useCover(cover) {
         this.coverFinderBusy = true;
-        fetch("./api/covers/upload", {
+        apiFetch("./api/covers/upload", {
           method: "POST",
           headers: {
             'Content-Type': 'application/json'
@@ -830,7 +831,7 @@
       },
       save() {
         this.editForm["image-path"] = this.editForm["image-path"].toString().replace(/"/g, '');
-        fetch("./api/apps", {
+        apiFetch("./api/apps", {
           method: "POST",
           headers: {
             'Content-Type': 'application/json'

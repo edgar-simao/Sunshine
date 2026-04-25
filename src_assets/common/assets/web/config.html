@@ -125,6 +125,7 @@
   import { computed, createApp } from 'vue'
   import { initApp } from './init'
   import Navbar from './Navbar.vue'
+  import { apiFetch } from './fetch_utils'
   import General from './configs/tabs/General.vue'
   import Inputs from './configs/tabs/Inputs.vue'
   import Network from './configs/tabs/Network.vue'
@@ -288,6 +289,7 @@
               "nvenc_spatial_aq": "disabled",
               "nvenc_vbv_increase": 0,
               "nvenc_realtime_hags": "enabled",
+              "nvenc_split_encode": "driver_decides",
               "nvenc_latency_over_power": "enabled",
               "nvenc_opengl_vulkan_on_dxgi": "enabled",
               "nvenc_h264_cavlc": "disabled",
@@ -329,6 +331,14 @@
             name: "VA-API Encoder",
             options: {
               "vaapi_strict_rc_buffer": "disabled",
+            },
+          },
+          {
+            id: "vulkan",
+            name: "Vulkan Encoder",
+            options: {
+              "vk_tune": 2,
+              "vk_rc_mode": 2,
             },
           },
           {
@@ -382,7 +392,7 @@
           var app = document.getElementById("app");
           if (this.platform === "windows") {
             this.tabs = this.tabs.filter((el) => {
-              return el.id !== "vt" && el.id !== "vaapi";
+              return el.id !== "vt" && el.id !== "vaapi" && el.id !== "vulkan";
             });
           }
           if (this.platform === "freebsd" || this.platform === "linux") {
@@ -392,7 +402,7 @@
           }
           if (this.platform === "macos") {
             this.tabs = this.tabs.filter((el) => {
-              return el.id !== "amd" && el.id !== "nv" && el.id !== "qsv" && el.id !== "vaapi";
+              return el.id !== "amd" && el.id !== "nv" && el.id !== "qsv" && el.id !== "vaapi" && el.id !== "vulkan";
             });
           }
 
@@ -436,6 +446,7 @@
           'qsv': 'Gpu',
           'vaapi': 'Gpu',
           'vt': 'Gpu',
+          'vulkan': 'Gpu',
           'sw': 'Cpu',
         };
         return iconMap[tabId] || 'Settings';
@@ -469,7 +480,7 @@
           });
         });
 
-        return fetch("./api/config", {
+        return apiFetch("./api/config", {
           method: "POST",
           headers: {
             'Content-Type': 'application/json'
@@ -495,7 +506,7 @@
             setTimeout(() => {
               this.saved = this.restarted = false;
             }, 5000);
-            fetch("./api/restart", {
+            apiFetch("./api/restart", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json"

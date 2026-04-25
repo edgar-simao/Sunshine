@@ -233,6 +233,7 @@ namespace platf {
     dxgi,  ///< DXGI
     cuda,  ///< CUDA
     videotoolbox,  ///< VideoToolbox
+    vulkan,  ///< Vulkan
     unknown  ///< Unknown
   };
 
@@ -485,10 +486,7 @@ namespace platf {
      */
     using pull_free_image_cb_t = std::function<bool(std::shared_ptr<img_t> &img_out)>;
 
-    display_t() noexcept:
-        offset_x {0},
-        offset_y {0} {
-    }
+    display_t() noexcept = default;
 
     /**
      * @brief Capture a frame.
@@ -535,23 +533,19 @@ namespace platf {
       return true;
     }
 
-    virtual bool is_event_driven() {
-      return false;
-    }
-
     virtual ~display_t() = default;
 
     // Offsets for when streaming a specific monitor. By default, they are 0.
-    int offset_x;
-    int offset_y;
-    int env_width;
-    int env_height;
-    int env_logical_width;
-    int env_logical_height;
-    int width;
-    int height;
-    int logical_width;
-    int logical_height;
+    int offset_x {0};
+    int offset_y {0};
+    int env_width {0};
+    int env_height {0};
+    int env_logical_width {0};
+    int env_logical_height {0};
+    int width {0};
+    int height {0};
+    int logical_width {0};
+    int logical_height {0};
 
   protected:
     // collect capture timing data (at loglevel debug)
@@ -569,7 +563,7 @@ namespace platf {
   public:
     virtual int set_sink(const std::string &sink) = 0;
 
-    virtual std::unique_ptr<mic_t> microphone(const std::uint8_t *mapping, int channels, std::uint32_t sample_rate, std::uint32_t frame_size, bool continuous) = 0;
+    virtual std::unique_ptr<mic_t> microphone(const std::uint8_t *mapping, int channels, std::uint32_t sample_rate, std::uint32_t frame_size, bool continuous, [[maybe_unused]] bool host_audio_enabled) = 0;
 
     /**
      * @brief Check if the audio sink is available in the system.
@@ -863,6 +857,15 @@ namespace platf {
   std::string get_host_name();
 
   /**
+   * @brief Resolves the render device path to use for hardware encoding.
+   * @details If `config::video.adapter_name` is set, returns that.
+   *          Otherwise, auto-detects the GPU with a connected display via `find_render_node_with_display()`.
+   *          Falls back to `/dev/dri/renderD128` if detection fails.
+   * @return Resolved render device path (may be empty on non-Linux platforms).
+   */
+  std::string resolve_render_device();
+
+  /**
    * @brief Gets the supported gamepads for this platform backend.
    * @details This may be called prior to `platf::input()`!
    * @param input Pointer to the platform's `input_t` or `nullptr`.
@@ -891,5 +894,16 @@ namespace platf {
    * @return A unique pointer to timer
    */
   std::unique_ptr<high_precision_timer> create_high_precision_timer();
+
+  /**
+   * @brief Check is the current process is running with elevated privileges (e.g. system admin/etc.)
+   * @return True if system admin capabilities are present.
+   */
+  bool has_elevated_privileges();
+
+  /**
+   * @brief Drop elevated privileges (e.g. system admin/etc.)
+   */
+  void drop_elevated_privileges();
 
 }  // namespace platf

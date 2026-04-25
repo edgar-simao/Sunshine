@@ -72,7 +72,7 @@ jobs:
 
       - name: Setup Dependencies Windows
         # if a dependency needs to be pinned, see https://github.com/LizardByte/build-deps/pull/186
-        uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda  # v2.30.0
+        uses: msys2/setup-msys2@e9898307ac31d1a803454791be09ab9973336e1c  # v2.31.1
         with:
           msystem: ${{ matrix.msystem }}
           update: true
@@ -179,7 +179,7 @@ jobs:
       - name: Setup NodeJS
         # Clang compiled NodeJS has issues when running rollup webpack
         if: matrix.msystem != 'ucrt64'
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
         with:
           node-version: 'lts/*'
 
@@ -249,7 +249,7 @@ jobs:
       - name: Sign Windows executables
         # ARM64 is not currently supported, see https://github.com/Azure/artifact-signing-action/issues/92
         if: inputs.publish_release == 'true' && inputs.azure_signing_account != '' && matrix.name != 'Windows-ARM64'
-        uses: azure/trusted-signing-action@87c2e83e6868da99d3380aa309851b32ed9a8346  # v1.1.0
+        uses: azure/trusted-signing-action@b443cf8ea4124818d2ea9f043cba29fc3ec47b16  # v1.2.0
         with:
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -285,7 +285,7 @@ jobs:
       - name: Sign Windows installers
         # ARM64 is not currently supported, see https://github.com/Azure/artifact-signing-action/issues/92
         if: inputs.publish_release == 'true' && inputs.azure_signing_account != '' && matrix.name != 'Windows-ARM64'
-        uses: azure/trusted-signing-action@87c2e83e6868da99d3380aa309851b32ed9a8346  # v1.1.0
+        uses: azure/trusted-signing-action@b443cf8ea4124818d2ea9f043cba29fc3ec47b16  # v1.2.0
         with:
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -335,7 +335,7 @@ jobs:
         if: >-
           always() &&
           (steps.test_report.outcome == 'success')
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: coverage-${{ matrix.name }}
           path: |
@@ -358,7 +358,7 @@ jobs:
             a "../artifacts/Sunshine-${{ matrix.name }}-debuginfo.7z" "*.dbg"
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: build-${{ matrix.name }}
           path: artifacts/
